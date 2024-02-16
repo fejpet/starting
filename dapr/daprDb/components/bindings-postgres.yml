@@ -1,0 +1,12 @@
+apiVersion: dapr.io/v1alpha1
+kind: Component
+metadata:
+  name: sqldb
+spec:
+  type: bindings.postgresql
+  version: v1
+  metadata:
+  - name: url # Required
+    value: "user=postgres password=example host=localhost port=5432 dbname=my_app pool_min_conns=1 pool_max_conns=10"
+  - name: direction
+    value: "output" # direction of the postgresql binding
