@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using System.Text;
 using Dapr.Client;
 
 namespace daprDb.Controllers;
@@ -27,6 +28,26 @@ public class ProductController : ControllerBase
     public async Task<IActionResult> Get()
     {
         using var client = new DaprClientBuilder().Build();
+        var command = new Dictionary<string,string>(){ 
+            {"sql", "select * from products where id < $1"} ,
+            {"params", "[3]"}
+        };
+        var request = new BindingRequest("sqldb", "query");
+        request.Metadata["sql"] = "select * from products where id <= $1";
+        request.Metadata["params"] = "[3]";
+         //var response = await client.InvokeBindingAsync<Bin, BindingResponse>(bindingName: "sqldb", operation: "query", data: "", metadata: command);
+        BindingResponse response = await client.InvokeBindingAsync(request);
+
+        var body = response.Data.ToArray();
+var message = Encoding.UTF8.GetString(body);
+
+        Console.WriteLine($"results: {message}");
+        return new OkResult();
+    }
+
+    private async void insert()
+    {
+        using var client = new DaprClientBuilder().Build();
         foreach(Product prod in Enumerable.Range(1, 5).Select(index => new Product
         {
             Id = index,
@@ -42,6 +63,6 @@ public class ProductController : ControllerBase
             Console.WriteLine(sqlText);
             await client.InvokeBindingAsync(bindingName: "sqldb", operation: "exec", data: "", metadata: command);
         }
-        return new OkResult();
+        //return new OkResult();
     }
 }
