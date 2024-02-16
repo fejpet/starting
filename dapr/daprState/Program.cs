@@ -1,13 +1,14 @@
 ﻿
-Dictionary<string, Order> repository = new();
+Dictionary<string, string> repository = new();
 
 Order order = new ("Some value");
 
-repository[order.Id.ToString()] = order;
+repository[order.Id.ToString()] = order.ToString();
 Console.WriteLine($"Saving Order: {order}");
 
-Order result = repository[order.Id.ToString()];
-Console.WriteLine($"Getting Order: {result}");
+string result = repository[order.Id.ToString()];
+Order orderLoaded = Order.CreateFromJson(result);
+Console.WriteLine($"Getting Order: {orderLoaded}");
 
 repository.Remove(order.Id.ToString());
 Console.WriteLine($"Deleting Order: {order}");

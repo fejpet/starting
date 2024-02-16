@@ -1,14 +1,27 @@
+using System.Text.Json;
+using System.Text.Json.Serialization;
 public class Order
 {
-    public Guid Id {get;private set;}
+    public String Id {get;private set;}
+
     public String Value {get;private set;}
 
     public Order(String value) {
-        Id = Guid.NewGuid();
+        Id = Guid.NewGuid().ToString();
         Value = value;
     }
 
     public override String ToString() {
-        return $"Order({Id}='{Value}')";
+        return JsonSerializer.Serialize(this);
     }
+
+    public static Order CreateFromJson(String jsonValue) {
+        var options = new JsonSerializerOptions()
+            {
+                PropertyNameCaseInsensitive = false
+            };
+        return JsonSerializer.Deserialize<Order>(jsonValue, options);
+    }
+
+
 }
