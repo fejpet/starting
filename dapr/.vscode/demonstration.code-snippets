@@ -20,15 +20,15 @@
 		"scope": "csharp",
 		"prefix": "daprclient",
 		"body": [
+			"using Dapr.Client;",
+			"",
 			"var client = new DaprClientBuilder().Build();"
 		]
 	},
 	"Dapr State Init" : {
 		"scope":"csharp",
-		"prefix": "daprStateStoreName",
+		"prefix": "daprStateInit",
 		"body" : [
-			"using Dapr.Client;",
-			"",
 			"string DAPR_STORE_NAME = \"statestore\";"
 		]
 	},
@@ -43,7 +43,7 @@
 		"scope": "csharp",
 		"prefix": "daprStateSaveSample",
 		"body" : [
-			"await client.SaveStateAsync(DAPR_STORE_NAME, order.Id.ToString(), order);"
+			"await client.SaveStateAsync(DAPR_STORE_NAME, order.Id, order);"
 		]
 	},
 	"Dapr Get state" : {
@@ -57,7 +57,7 @@
 		"scope": "csharp",
 		"prefix": "daprStateGetSample",
 		"body" : [
-			"var result = await client.GetStateAsync<string>(DAPR_STORE_NAME, order.Id.ToString());"
+			"Order result = await client.GetStateAsync<Order>(DAPR_STORE_NAME, order.Id);"
 		]
 	}, 
 	"Dapr Delete State " : {
@@ -71,7 +71,7 @@
 		"scope": "csharp",
 		"prefix": "daprStateDelSample",
 		"body" : [
-			"await client.DeleteStateAsync(DAPR_STORE_NAME, order.Id.ToString());"
+			"await client.DeleteStateAsync(DAPR_STORE_NAME, order.Id);"
 		]
 	}
 
