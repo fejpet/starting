@@ -27,6 +27,8 @@
 		"scope":"csharp",
 		"prefix": "daprStateStoreName",
 		"body" : [
+			"using Dapr.Client;",
+			"",
 			"string DAPR_STORE_NAME = \"statestore\";"
 		]
 	},
