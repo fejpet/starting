@@ -15,12 +15,19 @@
 	// 	],
 	// 	"description": "Log output to console"
 	// }
-
+	
 	"Dapr Client" : {
 		"scope": "csharp",
 		"prefix": "daprclient",
 		"body": [
 			"var client = new DaprClientBuilder().Build();"
+		]
+	},
+	"Dapr State Init" : {
+		"scope":"csharp",
+		"prefix": "daprStateStoreName",
+		"body" : [
+			"string DAPR_STORE_NAME = \"statestore\";"
 		]
 	},
 	"Dapr Save state": {
@@ -34,35 +41,35 @@
 		"scope": "csharp",
 		"prefix": "daprStateSaveSample",
 		"body" : [
-			"await client.SaveStateAsync(DAPR_STORE_NAME, orderId.ToString(), order.ToString());"
+			"await client.SaveStateAsync(DAPR_STORE_NAME, order.Id.ToString(), order);"
 		]
 	},
 	"Dapr Get state" : {
 		"scope": "csharp",
-		"prefix": "daprStateGetSample",
+		"prefix": "daprStateGet",
 		"body" : [
-			"var result = await client.GetStateAsync<string>(DAPR_STORE_NAME, orderId.ToString());"
+			"var result = await client.GetStateAsync<string>(DAPR_STORE_NAME, /*key*/$1);"
 		]
 	}, 
 	"Dapr Get state - Sample" : {
 		"scope": "csharp",
 		"prefix": "daprStateGetSample",
 		"body" : [
-			"var result = await client.GetStateAsync<string>(DAPR_STORE_NAME, orderId.ToString());"
+			"var result = await client.GetStateAsync<string>(DAPR_STORE_NAME, order.Id.ToString());"
 		]
 	}, 
 	"Dapr Delete State " : {
 		"scope": "csharp",
-		"prefix": "daprStateDelSample",
+		"prefix": "daprStateDel",
 		"body" : [
-			"await client.DeleteStateAsync(DAPR_STORE_NAME, orderId.ToString());"
+			"await client.DeleteStateAsync(DAPR_STORE_NAME, /*key*/$1);"
 		]
 	},
 	"Dapr Delete State - Sample" : {
 		"scope": "csharp",
 		"prefix": "daprStateDelSample",
 		"body" : [
-			"await client.DeleteStateAsync(DAPR_STORE_NAME, orderId.ToString());"
+			"await client.DeleteStateAsync(DAPR_STORE_NAME, order.Id.ToString());"
 		]
 	}
 
