@@ -29,10 +29,7 @@ public class ProductController : ControllerBase
     public async Task<IActionResult> Get()
     {
         using var client = new DaprClientBuilder().Build();
-        var command = new Dictionary<string, string>(){
-            {"sql", "select * from products where id < $1"} ,
-            {"params", "[3]"}
-        };
+
         var request = new BindingRequest("sqldb", "query");
         request.Metadata["sql"] = "select json_agg(products) from products where id <= $1";
         request.Metadata["params"] = "[3]";
@@ -57,6 +54,37 @@ public class ProductController : ControllerBase
 
         return Ok(productList);
     }
+
+    [HttpGet("{id}")]
+    public async Task<IActionResult> Get(int id)
+    {
+        using var client = new DaprClientBuilder().Build();
+
+        var request = new BindingRequest("sqldb", "query");
+        request.Metadata["sql"] = "select json_agg(products) from products where id = $1";
+        request.Metadata["params"] = $"[{id}]";
+        BindingResponse response = await client.InvokeBindingAsync(request);
+
+        var body = response.Data.ToArray();
+        var message = Encoding.UTF8.GetString(body);
+        Console.WriteLine($"get product: {message}");
+        var options = new JsonSerializerOptions()
+        {
+            PropertyNameCaseInsensitive = true
+        };
+
+        List<List<List<Product>>> products = JsonSerializer.Deserialize<List<List<List<Product>>>>(message, options);
+
+        var product = products.First().First().First();
+        return Ok(product);
+    }
+    [HttpPost()]
+    public async Task<IActionResult> Get(Product product)
+    {
+        Console.WriteLine($"Save product {product}");
+        return Ok(product);
+    }
+
 
     private async void insert()
     {

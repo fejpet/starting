@@ -1,0 +1,85 @@
+<html>
+
+<head>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body>
+    
+
+    <div id="result"></div>
+    <div class="container-lg">
+        <h1>DAPR Presentation</h1>
+        <h3>Product Details</h3>
+        <div id="formResult"></div>
+        <form id="detailsForm"></form>
+
+    </div>
+
+    <script>
+        const serialize_form = form => JSON.stringify(
+            Array.from(new FormData(form).entries())
+                .reduce((m, [ key, value ]) => Object.assign(m, { [key]: value }), {})
+            );
+
+        $('#detailsForm').on('submit', function(event){
+            event.preventDefault();
+            
+            const obj = serialize_form(this);
+
+            $.ajax({
+                type: 'POST',
+                url: '/product',
+                dataType: 'json',
+                data: obj,
+                contentType : 'application/json',
+                success: function(data) {
+                    console.log(data);
+                    $('#formResult').append(data);
+                }
+            });
+            
+            return false;
+        });
+
+        (function () {
+            var urlParams = new URLSearchParams(window.location.search);
+            var myAPI = "/product/" +  urlParams.get('id');
+            $.getJSON(myAPI, {
+                format: "json"
+            })
+                .done(function (data) {
+
+                    console.log('retrieve data: ' + JSON.stringify(data) );
+                    var formdata = "<div class=\"container\">" 
+                        + "<div class=\"row\">"
+                        + "<div class=\"col\" style=\"display:flex;justify-content:flex-end;\">id: </div><div class=\"col\"><input type=text name=id value=\"" + data.id + "\"></div>"
+                        + "</div>"
+                        + "<div class=\"row\">"
+                        + "<div class=\"col\" style=\"display:flex;justify-content:flex-end;\">name:</div><div class=\"col\"><input type=text name=name value=\"" + data.name + "\"></div>"
+                        + "</div>"
+                        + "<div class=\"row\">"
+                        + "<div class=\"col\" style=\"display:flex;justify-content:flex-end;\">available:</div><div class=\"col\"><input type=text name=available value=\"" + data.available + "\"></div>"
+                        + "</div>"
+                        + "<div class=\"row\">"
+                        + "<div class=\"col\" style=\"display:flex;justify-content:flex-end;\">price:</div><div class=\"col\"><input type=text name=price value=\"" + data.price + "\"></div>"
+                        + "</div>"
+                        + "<div class=\"row\">"
+                        + "<div class=\"col\" style=\"display:flex;justify-content:flex-end;\">currency:</div><div class=\"col\"><input type=text name=currency value=\"" + data.currency + "\"></div>"
+                        + "</div>"
+                        + "<div class=\"row\">"
+                        + "<div class=\"col\" style=\"display:flex;justify-content:flex-end;\">details:</div><div class=\"col\"><input type=text name=details value=\"" + data.details + "\"></div>"
+                        + "</div>"
+                        + "<div class=\"row\">"
+                        + "<div class=\"col\" style=\"display:flex;justify-content:flex-end;\"></div><div class=\"col\"><input type=submit value=\"save\"></div>"
+                        + "</div>"
+                        + "</div>"
+                    $('#detailsForm').append(formdata);
+                  });
+        })();            
+    </script>
+</body>
+
+</html>

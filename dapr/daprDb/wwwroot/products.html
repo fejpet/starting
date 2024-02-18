@@ -37,7 +37,7 @@
                 .done(function (data) {
                     $.each(data, function (index, item) {
                         var eachrow = "<tr>"
-                            + "<td><a href=\"/product/" + item.id + "\">" + item.id + "</a></td>"
+                            + "<td><a href=\"/productdetails.html?id" + item.id + "\">" + item.id + "</a></td>"
                             + "<td>" + item.name + "</a></td>"
                             + "<td>" + item.available + "</td>"
                             + "<td>" + item.price + item.currency +  "</td>"
