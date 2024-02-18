@@ -1,0 +1,53 @@
+<html>
+
+<head>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body>
+    
+
+    <div id="result"></div>
+    <div class="container-lg">
+        <h1>DAPR Presentation</h1>
+        <h3>Products</h3>
+        <table style="width: 100%" class="table">
+            <thead>
+                <tr>
+                    <th scope="col">Id</th>
+                    <th scope="col">Name</th>                    
+                    <th scope="col">Available</th>
+                    <th scope="col">Price</th>
+                    <th scope="col">Details</th>
+                </tr>
+            </thead>
+            <tbody id="tbody">
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        (function () {
+            var myAPI = "/product";
+            $.getJSON(myAPI, {
+                format: "json"
+            })
+                .done(function (data) {
+                    $.each(data, function (index, item) {
+                        var eachrow = "<tr>"
+                            + "<td><a href=\"/product/" + item.id + "\">" + item.id + "</a></td>"
+                            + "<td>" + item.name + "</a></td>"
+                            + "<td>" + item.available + "</td>"
+                            + "<td>" + item.price + item.currency +  "</td>"
+                            + "<td>" + item.details +  "</td>"
+                            + "</tr>";
+                        $('#tbody').append(eachrow);
+                    });
+                });
+        })();            
+    </script>
+</body>
+
+</html>
