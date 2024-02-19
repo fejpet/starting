@@ -7,7 +7,7 @@ Improve a simple in-memory dictionary with an external state storage (redis) and
 Prepare application 
    dotnet build
    dotnet run
-
+   dapr init
 
 Run with DAPR sidecar
 
@@ -60,7 +60,7 @@ PostgreSQL
       -----------+----------+----------+-----------------+------------+------------+------------+-----------+-----------------------
        my_dapr   | postgres | UTF8     | libc            | en_US.utf8 | en_US.utf8 |            |           |
    postgres=# \q
-
+   root@68203f2ee149:/# exit
 
 ## execute application with new statestore which points to postgres
 dapr run --app-id statemng -d ..\resource\components\ -- dotnet run

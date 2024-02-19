@@ -1,10 +1,18 @@
 using System.Collections.Concurrent;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddDatabaseDeveloperPageExceptionFilter();
+
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+
+builder.Services.AddDbContext<ProductDb>(options =>
+    options.UseNpgsql(connectionString));
 
 var app = builder.Build();
 
@@ -22,83 +30,96 @@ ConcurrentDictionary<int, Product> products = new();
 foreach (int index in Enumerable.Range(1, 5))
 {
     products[index] =
-    new Product
-    (
-        index,
-        "Name" + index,
-        DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-        1234.54f,
-        "HUF",
-        "Details" + index,
-        Guid.NewGuid()
-    );
+    new Product(index)
+    {
+        Name = "Name" + index,
+        Available = DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
+        Price = 12.50f,
+        Currency = "EUR",
+        Details = "product.Details",
+        Version = Guid.NewGuid()
+    };
 }
 
-app.MapGet("/product", () =>
+app.MapPost("/product/", async (Product p, ProductDb db) =>
 {
-    return products.Values;
-})
+    p.Version = Guid.NewGuid();
+    db.Products.Add(p);
+    await db.SaveChangesAsync();
+    return Results.Created($"/notes/{p.Id}", p);
+});
+
+app.MapGet("/products", async (ProductDb db) => await db.Products.ToListAsync())
 .WithName("GetProduct")
 .WithOpenApi();
 
-app.MapPut("/product", async Task<Results<Ok<Product>, Created, NotFound<Product>, BadRequest<Product>, Conflict<object>>> (Product product) =>
+app.MapGet("/products/{id:int}", async (int id, ProductDb db) =>
 {
-    if (product.Id == 0)
-    {
-        Product newProduct = new Product(products.Keys.Max() + 1, product.Name, product.Available, product.Price, product.Currency, product.Details, Guid.NewGuid());
-        products[newProduct.Id] = newProduct;
-        return TypedResults.Created("/product/" + newProduct.Id);
-    }
-    if (!products.ContainsKey(product.Id))
-    {
-        return TypedResults.NotFound(product);
-    }
-    try
-    {
-        products.AddOrUpdate(product.Id, product, (key, old) =>
-        {
-            if (product.Version.Equals(old.Version))
-            {
-                //create new record with new guid
-                return new Product(product.Id, product.Name, product.Available, product.Price, product.Currency, product.Details, Guid.NewGuid());
-            }
-            throw new InvalidDataException();
-        });
-        return TypedResults.Ok(products[product.Id]);
-    }
-    catch (InvalidDataException ex)
-    {
-        object result = new { Error = "update conflict", Id = product.Id };
-        return TypedResults.Conflict(result);
-    }
-    return TypedResults.BadRequest(product);
-})
-.Produces(400)
-.Produces<Product>()
-.WithOpenApi();
+    return await db.Products.FindAsync(id)
+            is Product p
+                ? Results.Ok(p)
+                : Results.NotFound();
+});
 
-app.MapDelete("/product/{id}", async Task<Results<Ok<Product>, Conflict<object>, NotFound>> (int id) =>
+
+app.MapPut("/products/{id}", async (int id, Product input, ProductDb db) =>
 {
-    if (products.ContainsKey(id))
+    var p = await db.Products.FindAsync(id);
+
+    if (p is null) return Results.NotFound();
+
+    if (!p.Version.Equals(input.Version))
     {
-        Product product;
-        if (products.TryRemove(id, out product))
-        {
-            return TypedResults.Ok(product);
-        }
-        else
-        {
-            object result = new { Error = "cannot remove", Id = id };
-            return TypedResults.Conflict(result);
-        }
+        return Results.Conflict();
     }
-    return TypedResults.NotFound();
-})
-.Produces(404)
-.Produces(409)
-.Produces<Product>()
-.WithOpenApi();
+    p.Name = input.Name;
+    p.Available = input.Available;
+    p.Price = input.Price;
+    p.Currency = input.Currency;
+    p.Details = input.Details;
+    p.Version = Guid.NewGuid();
+
+    await db.SaveChangesAsync();
+
+    return Results.NoContent();
+});
+
+app.MapDelete("/todoitems/{id}", async (int id, ProductDb db) =>
+{
+    if (await db.Products.FindAsync(id) is Product todo)
+    {
+        db.Products.Remove(todo);
+        await db.SaveChangesAsync();
+        return Results.NoContent();
+    }
+
+    return Results.NotFound();
+});
 
 app.Run();
 
-record Product(int Id, String Name, DateOnly Available, float Price, String Currency, String Details, Guid Version);
+public record Product(int Id)
+{
+    public string Name { get; set; } = default;
+    public DateOnly Available { get; set; } = default;
+    public float Price { get; set; } = default;
+    public String Currency { get; set; } = "EUR";
+    public String Details { get; set; } = default;
+    public Guid Version { get; set; } = default;
+
+}
+
+public class ProductDb : DbContext
+{
+    private string connectionString;
+    public ProductDb(DbContextOptions<ProductDb> options) : base(options)
+    {
+
+    }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<Product>().ToTable("products");
+    }
+    public DbSet<Product> Products => Set<Product>();
+}
