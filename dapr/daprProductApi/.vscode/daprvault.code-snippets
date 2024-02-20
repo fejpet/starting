@@ -1,21 +1,26 @@
 {
-	"Dapr Client" : {
-		"scope": "csharp",
-		"prefix": "daprclient",
-		"body": [
-			"using Dapr.Client;",
-			"",
-			"var client = new DaprClientBuilder().Build();"
-		]
-	},
-	"Dapr State Init" : {
-		"scope":"csharp",
-		"prefix": "daprSecretInit",
-		"body" : [
-			"const string DAPR_SECRET_STORE = \"shopSecrectStore\";",
-			"const string SECRET_NAME = \"productApiConnectionString\";"
-		]
-	},
-
-
+  "Dapr Client": {
+    "scope": "csharp",
+    "prefix": "daprclient",
+    "body": [
+      "using Dapr.Client;",
+      "",
+      "var client = new DaprClientBuilder().Build();"
+    ]
+  },
+  "Dapr Secret Init": {
+    "scope": "csharp",
+    "prefix": "daprSecretInit",
+    "body": [
+      "const string DAPR_SECRET_STORE = \"shopSecrectStore\";",
+      "const string SECRET_NAME = \"productApiConnectionString\";"
+    ]
+  },
+  "Dapr Secret Get": {
+    "scope": "csharp",
+    "prefix": "daprSecretGet",
+    "body": [
+      "var secret = await client.GetSecretAsync(DAPR_SECRET_STORE, SECRET_NAME);"
+    ]
+  }
 }
