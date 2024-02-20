@@ -65,7 +65,7 @@ app.MapPut("/products/{id}", async (int id, Product input, ProductDb db) =>
     return Results.NoContent();
 });
 
-app.MapDelete("/todoitems/{id}", async (int id, ProductDb db) =>
+app.MapDelete("/products/{id}", async (int id, ProductDb db) =>
 {
     if (await db.Products.FindAsync(id) is Product todo)
     {
