@@ -1,0 +1,21 @@
+{
+	"Dapr Client" : {
+		"scope": "csharp",
+		"prefix": "daprclient",
+		"body": [
+			"using Dapr.Client;",
+			"",
+			"var client = new DaprClientBuilder().Build();"
+		]
+	},
+	"Dapr State Init" : {
+		"scope":"csharp",
+		"prefix": "daprSecretInit",
+		"body" : [
+			"const string DAPR_SECRET_STORE = \"shopSecrectStore\";",
+			"const string SECRET_NAME = \"productApiConnectionString\";"
+		]
+	},
+
+
+}
