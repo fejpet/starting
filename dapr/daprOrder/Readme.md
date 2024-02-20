@@ -1,0 +1,1 @@
+dapr run --app-port 5144 --app-id order-processor --app-protocol http --dapr-http-port 3500 -d ./components -- dotnet run

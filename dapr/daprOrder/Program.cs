@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Dapr.Client;
+using System.Text.Json.Serialization;
 
 var client = new DaprClientBuilder().Build();
 var builder = WebApplication.CreateBuilder(args);
@@ -9,13 +10,13 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 const string DAPR_SECRET_STORE = "shopSecrectStore";
-const string PRODUCT_API_CONNECTIONSTRING = "productApiConnectionString";
+const string PRODUCT_API_CONNECTIONSTRING = "orderConnectionString";
 
 var secret = await client.GetSecretAsync(DAPR_SECRET_STORE, PRODUCT_API_CONNECTIONSTRING);
 var connectionString = secret[PRODUCT_API_CONNECTIONSTRING];
 Console.WriteLine(connectionString);
 
-builder.Services.AddDbContext<ProductDb>(options =>
+builder.Services.AddDbContext<OrderDb>(options =>
     options.UseNpgsql(connectionString));
 
 var app = builder.Build();
@@ -29,30 +30,39 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.MapPost("/product/", async (Product p, ProductDb db) =>
+app.MapPost("/orders/", async (Order p, OrderDb db) =>
 {
+    Console.WriteLine("post");
+    /*
     p.Version = Guid.NewGuid();
-    db.Products.Add(p);
-    await db.SaveChangesAsync();
-    return Results.Created($"/notes/{p.Id}", p);
+    db.Orders.Add(p);
+    await db.SaveChangesAsync();*/
+    return Results.Created($"/orders/{p.OrderId}", p);
 });
 
-app.MapGet("/products", async (ProductDb db) => await db.Products.ToListAsync())
-.WithName("GetProduct")
+app.MapGet("/orders", async (OrderDb db) =>
+{
+    return Results.Ok(new Order(2));
+    //return await db.Orders.ToListAsync();
+})
+.WithName("GetOrder")
 .WithOpenApi();
 
-app.MapGet("/products/{id:int}", async (int id, ProductDb db) =>
+app.MapGet("/orders/{id:int}", async (int id, OrderDb db) =>
 {
-    return await db.Products.FindAsync(id)
-            is Product p
+    return Results.Ok(new Order(1));
+    /*
+    return await db.Orders.FindAsync(id)
+            is Order p
                 ? Results.Ok(p)
                 : Results.NotFound();
+                */
 });
 
 
-app.MapPut("/products/{id}", async (int id, Product input, ProductDb db) =>
+app.MapPut("/orders/{id}", async (int id, Order input, OrderDb db) =>
 {
-    var p = await db.Products.FindAsync(id);
+    var p = await db.Orders.FindAsync(id);
 
     if (p is null) return Results.NotFound();
 
@@ -60,11 +70,6 @@ app.MapPut("/products/{id}", async (int id, Product input, ProductDb db) =>
     {
         return Results.Conflict();
     }
-    p.Name = input.Name;
-    p.Available = input.Available;
-    p.Price = input.Price;
-    p.Currency = input.Currency;
-    p.Details = input.Details;
     p.Version = Guid.NewGuid();
 
     await db.SaveChangesAsync();
@@ -72,11 +77,11 @@ app.MapPut("/products/{id}", async (int id, Product input, ProductDb db) =>
     return Results.NoContent();
 });
 
-app.MapDelete("/products/{id}", async (int id, ProductDb db) =>
+app.MapDelete("/orders/{id}", async (int id, OrderDb db) =>
 {
-    if (await db.Products.FindAsync(id) is Product todo)
+    if (await db.Orders.FindAsync(id) is Order order)
     {
-        db.Products.Remove(todo);
+        db.Orders.Remove(order);
         await db.SaveChangesAsync();
         return Results.NoContent();
     }
@@ -86,28 +91,22 @@ app.MapDelete("/products/{id}", async (int id, ProductDb db) =>
 
 app.Run();
 
-public record Product(int Id)
+public record Order([property: JsonPropertyName("orderId")] int OrderId)
 {
-    public string Name { get; set; } = default;
-    public DateOnly Available { get; set; } = default;
-    public float Price { get; set; } = default;
-    public String Currency { get; set; } = "EUR";
-    public String Details { get; set; } = default;
     public Guid Version { get; set; } = default;
-
 }
 
-public class ProductDb : DbContext
+public class OrderDb : DbContext
 {
     private string connectionString;
-    public ProductDb(DbContextOptions<ProductDb> options) : base(options)
+    public OrderDb(DbContextOptions<OrderDb> options) : base(options)
     {
 
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<Product>().ToTable("products");
+        modelBuilder.Entity<Order>().ToTable("orders");
     }
-    public DbSet<Product> Products => Set<Product>();
+    public DbSet<Order> Orders => Set<Order>();
 }
