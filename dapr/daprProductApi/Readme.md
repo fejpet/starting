@@ -32,5 +32,8 @@ dotnet ef database update firstmigration --project .\daprProductApi.csproj
     <ItemGroup>
       <PackageReference Include="Dapr.AspNetCore" Version="1.12.*-*" />
     </ItemGroup>
+
+or simple execute "dotnet add package Dapr.AspNetCore"
 ## Adding Vault from DAPR
 
+dapr run --app-id productapi -d .\components\ -- dotnet run
