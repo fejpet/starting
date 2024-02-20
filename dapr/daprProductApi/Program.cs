@@ -1,6 +1,4 @@
 using System.Collections.Concurrent;
-using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -24,22 +22,6 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
-ConcurrentDictionary<int, Product> products = new();
-
-foreach (int index in Enumerable.Range(1, 5))
-{
-    products[index] =
-    new Product(index)
-    {
-        Name = "Name" + index,
-        Available = DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-        Price = 12.50f,
-        Currency = "EUR",
-        Details = "product.Details",
-        Version = Guid.NewGuid()
-    };
-}
 
 app.MapPost("/product/", async (Product p, ProductDb db) =>
 {
