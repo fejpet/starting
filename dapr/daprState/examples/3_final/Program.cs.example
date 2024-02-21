@@ -3,7 +3,7 @@ using Dapr.Client;
 
 var client = new DaprClientBuilder().Build();
 
-Order order = new ("Some value");
+Order order = new (Guid.NewGuid().ToString(), "Some value");
 
 string DAPR_STORE_NAME = "statestore";
 
