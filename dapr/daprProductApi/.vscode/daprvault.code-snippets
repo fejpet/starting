@@ -13,14 +13,15 @@
     "prefix": "daprSecretInit",
     "body": [
       "const string DAPR_SECRET_STORE = \"shopSecrectStore\";",
-      "const string SECRET_NAME = \"productApiConnectionString\";"
+      "const string PRODUCT_API_CONNECTIONSTRING = \"productApiConnectionString\";"
     ]
   },
   "Dapr Secret Get": {
     "scope": "csharp",
     "prefix": "daprSecretGet",
     "body": [
-      "var secret = await client.GetSecretAsync(DAPR_SECRET_STORE, SECRET_NAME);"
+      "var secret = await client.GetSecretAsync(DAPR_SECRET_STORE, PRODUCT_API_CONNECTIONSTRING);",
+      "var connectionString = secret[PRODUCT_API_CONNECTIONSTRING];"
     ]
   }
 }
