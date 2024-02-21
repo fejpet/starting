@@ -1,7 +1,7 @@
 ﻿
 Dictionary<string, string> repository = new();
 
-Order order = new ("Some value");
+Order order = new (Guid.NewGuid().ToString(), "Some value");
 
 repository[order.Id] = order.ToString();
 Console.WriteLine($"Saving Order: {order}");

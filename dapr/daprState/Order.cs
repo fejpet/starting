@@ -6,8 +6,8 @@ public class Order
 
     public String Value {get;private set;}
 
-    public Order(String value) {
-        Id = Guid.NewGuid().ToString();
+    public Order(String id, String value) {
+        Id = id;
         Value = value;
     }
 
